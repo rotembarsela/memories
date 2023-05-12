@@ -1,0 +1,1 @@
+type AuthVariant = "LOGIN" | "REGISTER";
