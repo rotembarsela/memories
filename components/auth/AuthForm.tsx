@@ -8,7 +8,7 @@ import { Divider } from "../Divider";
 import { AuthSocialLoginButton } from "./AuthSocialLoginButton";
 import { BsGoogle, BsFacebook } from "react-icons/bs";
 import { api } from "@/lib";
-import { Toast } from "@/features/toast";
+import { ToastError, ToastSuccess } from "@/features/toast";
 
 type AuthFormProps = {
   variant: AuthVariant;
@@ -43,12 +43,12 @@ export default function AuthForm({
     if (variant === "REGISTER") {
       try {
         await api.post("/api/register", data);
+        ToastSuccess("Registered successfully");
       } catch (error) {
-        Toast.fire({
-          icon: "error",
-          title: "Register failed, please try again",
-        });
+        ToastError("Something went wrong, please try again");
       }
+
+      setIsLoading(false);
     }
 
     if (variant === "LOGIN") {
