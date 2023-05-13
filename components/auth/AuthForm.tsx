@@ -9,6 +9,7 @@ import { AuthSocialLoginButton } from "./AuthSocialLoginButton";
 import { BsGoogle, BsFacebook } from "react-icons/bs";
 import { api } from "@/lib";
 import { ToastError, ToastSuccess } from "@/features/toast";
+import { signIn } from "next-auth/react";
 
 type AuthFormProps = {
   variant: AuthVariant;
@@ -38,8 +39,6 @@ export default function AuthForm({
     event?.preventDefault();
     setIsLoading(true);
 
-    console.log(data);
-
     if (variant === "REGISTER") {
       try {
         await api.post("/api/register", data);
@@ -47,19 +46,50 @@ export default function AuthForm({
       } catch (error) {
         ToastError("Something went wrong, please try again");
       }
-
-      setIsLoading(false);
     }
 
     if (variant === "LOGIN") {
-      // NextAuth
+      try {
+        const isSignInSucess = await signIn("credentials", {
+          ...data,
+          redirect: false,
+        });
+
+        console.log(isSignInSucess);
+
+        if (isSignInSucess?.error) {
+          ToastError("Invalid Credentials");
+        }
+
+        if (isSignInSucess?.ok && !isSignInSucess.error) {
+          ToastSuccess("Logged in successfully");
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
+
+    setIsLoading(false);
   };
 
-  const socialLoginAction = (action: string) => {
+  const socialLoginAction = async (action: string) => {
     setIsLoading(true);
 
-    // NextAuth Signin
+    try {
+      const isSignInSucess = await signIn(action, { redirect: false });
+
+      if (isSignInSucess?.error) {
+        ToastError("Invalid Credentials");
+      }
+
+      if (isSignInSucess?.ok && !isSignInSucess.error) {
+        ToastSuccess("Logged in successfully");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    setIsLoading(false);
   };
 
   const togglevariant = useCallback(() => {
