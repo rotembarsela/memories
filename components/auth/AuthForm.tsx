@@ -2,14 +2,21 @@
 
 import { Button } from "@/features/button";
 import { Input } from "@/features/forms";
-import { useCallback, useState, Dispatch, SetStateAction } from "react";
+import {
+  useCallback,
+  useState,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { useForm, FieldValues, SubmitHandler } from "react-hook-form";
 import { Divider } from "../Divider";
 import { AuthSocialLoginButton } from "./AuthSocialLoginButton";
 import { BsGoogle, BsFacebook } from "react-icons/bs";
 import { api } from "@/lib";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { ToastError, ToastSuccess } from "@/features/toast";
-import { signIn } from "next-auth/react";
 
 type AuthFormProps = {
   variant: AuthVariant;
@@ -20,6 +27,9 @@ export default function AuthForm({
   variant = "LOGIN",
   setVariant = () => {},
 }: AuthFormProps) {
+  const { status } = useSession();
+  const { push } = useRouter();
+  //const { ToastSuccess, ToastError } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -53,16 +63,20 @@ export default function AuthForm({
         const isSignInSucess = await signIn("credentials", {
           ...data,
           redirect: false,
+          callbackUrl: "/memories",
         });
-
-        console.log(isSignInSucess);
 
         if (isSignInSucess?.error) {
           ToastError("Invalid Credentials");
         }
 
         if (isSignInSucess?.ok && !isSignInSucess.error) {
-          ToastSuccess("Logged in successfully");
+          ToastSuccess("Signed in successfully");
+          if (isSignInSucess.url) {
+            push(isSignInSucess.url);
+          } else {
+            push("/memories");
+          }
         }
       } catch (error) {
         console.log(error);
@@ -98,6 +112,12 @@ export default function AuthForm({
       reset();
     }
   }, [variant, isLoading]);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      push("/memories");
+    }
+  }, [status, push]);
 
   return (
     <div className="mt-8 mx-auto w-full max-w-md">

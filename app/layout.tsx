@@ -1,5 +1,10 @@
+"use client";
+
+import { AuthContext } from "@/contexts/AuthContext";
 import "./globals.css";
 import { Inter } from "next/font/google";
+import clsx from "clsx";
+import { SA2Provider } from "@/contexts/SA2Context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,10 +20,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <main className="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-100">
+      <body
+        className={clsx(
+          `
+        text-gray-700
+      `,
+          inter.className
+        )}
+      >
+        <AuthContext>
+          {/*<SA2Provider>*/}
           {children}
-        </main>
+          {/*</AuthContext>*/}
+        </AuthContext>
       </body>
     </html>
   );
